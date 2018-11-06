@@ -1,0 +1,16 @@
+##
+
+host_key
+host_key.pub
+
+*.log
+
+#
+
+bin
+build
+local
+
+#
+foregate
+##
