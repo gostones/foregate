@@ -2,10 +2,12 @@
 
 #args:
 
-#DRY_RUN=echo
+# DRY_RUN=echo
 
 name=$1
 [[ $# -lt 1 ]] && name="foregate"
+
+webport=5080
 
 ##
 function deploy() {
@@ -15,11 +17,15 @@ function deploy() {
 
     #$DRY_RUN cf delete-route $domain --hostname $name -f
 
-    $DRY_RUN cf push $name -f manifest.yml -d $domain --hostname $name; if [ $? -ne 0 ]; then
+    $DRY_RUN cf push $name -f manifest.yml -d $domain --hostname $name --no-start; if [ $? -ne 0 ]; then
         return 1
-    else
-        return 0
     fi
+
+    $DRY_RUN cf set-env $name FG_WEB http://localhost:${webport}
+    $DRY_RUN cf set-env $name PG_VSCHEME https
+    $DRY_RUN cf set-env $name PG_VHOST ${name}.${domain}
+
+    $DRY_RUN cf start $name
 }
 
 #

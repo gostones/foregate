@@ -1,14 +1,17 @@
 ---
 applications:
 - name: foregate
-  health-check-type: http
-  health-check-http-endpoint: /__/ping
+  health-check-type: port
+#   health-check-type: http
+#   health-check-http-endpoint: /ping
   memory: 128M
   disk_quota: 1G
   instances: 1
   command: /app/bin/foregate server
   buildpack: https://github.com/cloudfoundry/binary-buildpack.git
   env:
-    RPS_PORT: 8000
+    FG_WEB: http://localhost:5080
+    PG_VSCHEME: https
+    PG_VHOST: foregate.run.aws-usw02-pr.ice.predix.io
 ##
 

@@ -22,8 +22,6 @@ import (
 	"github.com/jpillora/requestlog"
 	"github.com/jpillora/sizestr"
 	"golang.org/x/crypto/ssh"
-
-	"github.com/gostones/foregate/server"
 )
 
 type Config struct {
@@ -46,7 +44,7 @@ type Server struct {
 	sessCount    int32
 	connCount    int32
 	connOpen     int32
-	httpServer   *server.HTTPServer
+	httpServer   *chshare.HTTPServer
 	reverseProxy *httputil.ReverseProxy
 	sshConfig    *ssh.ServerConfig
 	socksServer  *socks5.Server
@@ -55,7 +53,7 @@ type Server struct {
 func NewServer(config *Config) (*Server, error) {
 	s := &Server{
 		Logger:     chshare.NewLogger("server"),
-		httpServer: server.NewHTTPServer(),
+		httpServer: chshare.NewHTTPServer(),
 		sessions:   chshare.Users{},
 	}
 	s.Info = true
@@ -147,7 +145,7 @@ func (s *Server) Start(host, port string) error {
 	}
 	s.Infof("Listening on %s...", port)
 
-	h := http.Handler(http.HandlerFunc(s.handleHTTP))
+	var h http.Handler = http.HandlerFunc(s.handleHTTP)
 	if s.Debug {
 		h = requestlog.Wrap(h)
 	}
@@ -202,9 +200,7 @@ func (s *Server) authUser(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, er
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
+	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
 func (s *Server) handleWS(w http.ResponseWriter, req *http.Request) {

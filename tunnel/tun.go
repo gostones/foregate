@@ -1,6 +1,7 @@
 package tunnel
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -71,7 +72,7 @@ func generatePidFile() {
 //    chisel client --help for more information.
 //` + commonHelp
 
-func TunServer(port string) {
+func TunServer(port int, proxy string) {
 	//flags := flag.NewFlagSet("server", flag.ContinueOnError)
 	//
 	//host := flags.String("host", "", "")
@@ -117,15 +118,11 @@ func TunServer(port string) {
 	//	Socks5:   *socks5,
 	//})
 
-	if port == "" {
-		port = "8080"
-	}
-
 	s, err := NewServer(&Config{
 		KeySeed:  "",
 		AuthFile: "",
 		Auth:     "",
-		Proxy:    "",
+		Proxy:    proxy,
 		Socks5:   false,
 	})
 	if err != nil {
@@ -135,7 +132,7 @@ func TunServer(port string) {
 	//if *pid {
 	//	generatePidFile()
 	//}
-	if err = s.Run("0.0.0.0", port); err != nil {
+	if err = s.Run("0.0.0.0", fmt.Sprintf("%v", port)); err != nil {
 		log.Fatal(err)
 	}
 }
